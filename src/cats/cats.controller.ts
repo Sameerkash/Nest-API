@@ -5,11 +5,15 @@ import {
   ForbiddenException,
   Get,
   Param,
+  ParseIntPipe,
   Post,
   Put,
   UseFilters,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { HttpExceptionFilter } from 'src/common/exceptions/http-exception.filters';
+import { JoiValidationPipe } from 'src/common/pipes/validation.pipe';
 import { CatsService } from './cats.service';
 import { CreateCatDto, UpdateCatDto } from './create-cat.dto';
 import { Cat } from './interfaces/cat.interface';
@@ -24,16 +28,15 @@ export class CatsController {
   }
 
   @Get()
-  @UseFilters(new HttpExceptionFilter())
+  @UsePipes(new ValidationPipe())
   async findAll(): Promise<Cat[]> {
     throw new ForbiddenException();
   }
-
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return `This action returns a #${id} cat`;
+  async findOne(@Param('id', new ParseIntPipe()) id) {
+    return this.catsService.findOne(id);
   }
-
+  
   @Put(':id')
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   update(@Param('id') id: string, @Body() updateCatDto: UpdateCatDto) {
