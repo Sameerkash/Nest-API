@@ -8,21 +8,23 @@ import {
   ParseIntPipe,
   Post,
   Put,
-  UseFilters,
+  UseGuards,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { HttpExceptionFilter } from 'src/common/exceptions/http-exception.filters';
-import { JoiValidationPipe } from 'src/common/pipes/validation.pipe';
+import { Roles } from 'src/common/guards/roles.decorator';
+import { RolesGuard } from 'src/common/guards/roles.guard';
 import { CatsService } from './cats.service';
 import { CreateCatDto, UpdateCatDto } from './create-cat.dto';
 import { Cat } from './interfaces/cat.interface';
 
+@UseGuards(RolesGuard)
 @Controller('cats')
 export class CatsController {
   constructor(private catsService: CatsService) {}
 
   @Post()
+  @Roles('admin')
   async create(@Body() createCatDto: CreateCatDto) {
     this.catsService.create(createCatDto);
   }
@@ -36,7 +38,7 @@ export class CatsController {
   async findOne(@Param('id', new ParseIntPipe()) id) {
     return this.catsService.findOne(id);
   }
-  
+
   @Put(':id')
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   update(@Param('id') id: string, @Body() updateCatDto: UpdateCatDto) {
